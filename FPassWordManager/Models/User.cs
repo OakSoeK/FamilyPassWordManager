@@ -1,16 +1,28 @@
-﻿namespace FPassWordManager.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace FPassWordManager.Models
 {
+    [PrimaryKey(nameof(UserId))]
     public class User
     {
-        public int Uid { get; set; }
-        public string FirstName { get; set; }
-        public string? LastName { get; set; }
-        public string? PhNumber { get; set; }
-        public string Username { get; set; }
-        public byte[] PasswordHash { get; set; }
-        public byte[] PinHash { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public Guid UserId { get; set; }
+        [MaxLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+        [MaxLength(50)]
+        public string? LastName { get; set; } = string.Empty;
+        [MaxLength(30)]
+        public string? PhNumber { get; set; } = string.Empty;
+        [MaxLength(50)]
+        public string Username { get; set; } = string.Empty;
+        [MaxLength(50)]
+        public string PasswordHash { get; set; } = string.Empty;
+        [MaxLength(5)]
+        public string PinHash { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastActive { get; set; }
+        //Navigation
 
+        public ICollection<Credential> Credentials { get; set; } =new List<Credential>();
     }
 }

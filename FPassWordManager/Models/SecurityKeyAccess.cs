@@ -3,26 +3,24 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FPassWordManager.Models
 {
-    [PrimaryKey(nameof(CredentialAccessId))]
-    public class CredentialAccess
+    [PrimaryKey(nameof(SecurityKeyAccessId))]
+    public class SecurityKeyAccess
     {
-        public Guid CredentialAccessId { get; set; }
-        public Guid CredentialId { get; set; }
+        public Guid SecurityKeyAccessId { get; set; }
+        public Guid SecurityKeyId { get; set; }
         public Guid UserId { get; set; }
+
         [MaxLength(50)]
         public string PermissionLevel { get; set; } = string.Empty;
-        [MaxLength(50)]
         public DateTime ExpireAt { get; set; }
         public DateTime SharedAt { get; set; }
+
         public Guid SharedByUserId { get; set; }
-
         //Navigation
-        public Credential Credential { get; set; }
-
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public User SharedByUser { get; set; }
+        public SecurityKey SecurityKey { get; set; }
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public User User { get; set; }
-
     }
 }

@@ -1,20 +1,39 @@
-﻿namespace FPassWordManager.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace FPassWordManager.Models
 {
+    [PrimaryKey(nameof(CreditDebitId))]
     public class CreditDebitCard
     {
-        public int CDid { get; set; }
-        public int Cid { get; set; }
-        public string CardHolderName { get; set; }
-        public byte[] CardNumberHash { get; set; }
-        public byte ExpiryMonth { get; set; }
-        public byte ExpiryYear { get; set; }
-        public byte[] CvvHash { get; set; }
-        public string? BillingAddress { get; set; }
-        public string? Notes { get; set; }
+        public Guid CreditDebitId { get; set; }
+        public Guid CredentialId { get; set; }
+        [MaxLength(50)]
+        public string CardHolderName { get; set; } = string.Empty;
+        [MaxLength(30)]
+        public string CardNumberHash { get; set; } = string.Empty;
+        [MaxLength(2)]
+        public string ExpiryMonth { get; set; } = string.Empty;
+        [MaxLength(2)]
+        public string ExpiryYear { get; set; } = string.Empty;
+        [MaxLength(3)]
+        public string CvvHash { get; set; } = string.Empty;
+        [MaxLength(10)]
+        public string PinHash { get; set; } = string.Empty;
+        [MaxLength(50)]
+        public string? BillingAddress { get; set; } = string.Empty;
+        [MaxLength(100)]
+        public string? Notes { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
-        public int CreatedBy { get; set; }
-        public DateTime EditedAt { get; set; }
-        public int EditedBy { get; set; }
-
+        public Guid CreatorId { get; set; }
+        public DateTime? EditedAt { get; set; }
+        public Guid? EditorId { get; set; }
+        //Navigation
+        public Credential Credential { get; set; }
+        [DeleteBehavior(DeleteBehavior.Restrict)]
+        public User Creator { get; set; }
+        [DeleteBehavior(DeleteBehavior.Restrict)]
+        public User? Editor { get; set; }
+        public ICollection<CreditDebitCardAccess> Accesses { get; set; } =new List<CreditDebitCardAccess>();
     }
 }
