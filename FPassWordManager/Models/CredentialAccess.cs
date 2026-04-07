@@ -9,20 +9,14 @@ namespace FPassWordManager.Models
         public Guid CredentialAccessId { get; set; }
         public Guid CredentialId { get; set; }
         public Guid UserId { get; set; }
-        [MaxLength(50)]
-        public string PermissionLevel { get; set; } = string.Empty;
-        [MaxLength(50)]
+        [MaxLength(50)] public string PermissionLevel { get; set; } = string.Empty;
         public DateTime ExpireAt { get; set; }
         public DateTime SharedAt { get; set; }
         public Guid SharedByUserId { get; set; }
 
-        //Navigation
-        public Credential Credential { get; set; }
-
-        [DeleteBehavior(DeleteBehavior.Restrict)]
-        public User SharedByUser { get; set; }
-        [DeleteBehavior(DeleteBehavior.Restrict)]
-        public User User { get; set; }
-
+        public Credential Credential { get; set; } = null!;
+        public User SharedByUser { get; set; } = null!;
+        public User User { get; set; } = null!;
     }
+
 }
