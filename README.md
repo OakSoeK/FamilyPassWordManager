@@ -8,7 +8,7 @@ Secured Vault — Store Encrypted web logins, credit/debit cards, and security k
 
 Folder Organization — Group credentials into named folders
 
-My items tab — A personal list of all your individually saved credentials
+My items tab — A list of all your individually saved credentials
 
 Item-Level sharing — Share individual items with other users with View or Edit permissions and expiry dates
 
@@ -39,16 +39,60 @@ Delete account — Full account deletion with safe cleanup of personal data and 
 
 1. **Clone the repo**
 
-2. **Configure database** — update `appsettings.json` with your connection string:
+2. **Configure database** — update `appsettings.json` with your connection string
 
-3. **Run migrations** — in Visual Studio Package Manager Console:
+3. **Run migrations** — in Visual Studio Package Manager Console
 
 4. **Run the app**
 
 ## Project Structure
 
 ```
-
+FPassWordManager/
+├── Areas/
+│   └── Identity/
+│       └── Pages/                                       # Profile, password, PIN, delete (Custom-Edit Account)
+│           └── Account/
+│               ├── Login.cshtml / Login.cshtml.cs
+│               ├── Logout.cshtml / Logout.cshtml.cs
+│               ├── Register.cshtml / Register.cshtml.cs
+│               └── Manage/
+│                   └── Index.cshtml / Index.cshtml.cs   
+├── Controllers/
+│   └── Controllers.cs                                   # API controllers (credentials, access, items)
+├── Data/
+│   └── AppDbContext.cs                                  # EF Core context
+├── DTOs/                                                # Data transfer objects
+├── Extensions/
+│   └── Extensions.cs                                    # Service registration helpers
+├── Migrations/                                          # Migration files
+├── Models/
+│   └── Models.cs                                        # Models
+├── Pages/
+│   ├── Shared/                                          # Layout and partials
+│   ├── _ViewImports.cshtml
+│   ├── _ViewStart.cshtml
+│   ├── Error.cshtml / Error.cshtml.cs
+│   ├── Index.cshtml / Index.cshtml.cs                   # Dashboard
+│   ├── Privacy.cshtml / Privacy.cshtml.cs
+│   ├── SharedItems.cshtml / SharedItems.cshtml.cs       # Items shared with you
+│   └── Vault.cshtml / Vault.cshtml.cs                   # Folder, Vault UI
+├── Services/
+│   ├── Interfaces/
+│   │   └── Interfaces.cs                                # Service interfaces
+│   └── Services.cs                                      # Main Logic
+├── wwwroot/
+│   ├── css/
+│   │   ├── bootstrap.css
+│   │   └── site.css                                     # Custom dark theme
+│   └── js/
+│       ├── index.js                                     # Dashboard logic
+│       ├── shareditems.js                               # Shared items logic
+│       ├── site.js
+│       └── vault.js                                     # Vault logic
+├── appsettings.json
+├── launchSettings.json
+└── Program.cs
 ```
 
 
@@ -61,4 +105,6 @@ Delete account — Full account deletion with safe cleanup of personal data and 
 
 
 ## Team Members
+
+
 -Oak Soe Khant(Developer)
