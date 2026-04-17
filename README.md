@@ -20,10 +20,10 @@ Shared item tab — See everything shared with you in one place, with history an
 
 Delete account — Full account deletion with safe cleanup of personal data and all shared access records
 
-##Stack
+## Stack
 
 - **Backend** — ASP.NET Core, Razor Pages, EF Core, SQL Server
-- **Auth** — ASP.NET Identity with a custom 5-digit vault PIN
+- **Auth** — ASP.NET Identity with a custom 5-digit vault PIN and Fields
 - **Frontend** — Vanilla JS, custom dark-theme CSS 
 - **API** — RESTful controllers for all CRUD and access operations
 
@@ -42,6 +42,7 @@ Delete account — Full account deletion with safe cleanup of personal data and 
 2. **Configure database** — update `appsettings.json` with your connection string
 
 3. **Run migrations** — in Visual Studio Package Manager Console
+   ``Update-Database``
 
 4. **Run the app**
 
