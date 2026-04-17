@@ -1,0 +1,356 @@
+
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'OSKPMDbProduction')
+BEGIN
+    CREATE DATABASE OSKPMDbProduction;
+END
+
+
+USE OSKPMDbProduction;
+
+
+CREATE TABLE [AspNetRoles] (
+    [Id]               uniqueidentifier NOT NULL,
+    [Name]             nvarchar(256)    NULL,
+    [NormalizedName]   nvarchar(256)    NULL,
+    [ConcurrencyStamp] nvarchar(max)    NULL,
+    CONSTRAINT [PK_AspNetRoles] PRIMARY KEY ([Id])
+);
+
+
+CREATE TABLE [AspNetUsers] (
+    [Id]                   uniqueidentifier NOT NULL,
+    [FirstName]            nvarchar(30)     NOT NULL,
+    [LastName]             nvarchar(30)     NULL,
+    [PhNumber]             nvarchar(30)     NULL,
+    [PinHash]              nvarchar(512)    NOT NULL,
+    [CreatedAt]            datetime2        NOT NULL,
+    [LastActive]           datetime2        NULL,
+    [UserName]             nvarchar(256)    NULL,
+    [NormalizedUserName]   nvarchar(256)    NULL,
+    [Email]                nvarchar(256)    NULL,
+    [NormalizedEmail]      nvarchar(256)    NULL,
+    [EmailConfirmed]       bit              NOT NULL,
+    [PasswordHash]         nvarchar(max)    NULL,
+    [SecurityStamp]        nvarchar(max)    NULL,
+    [ConcurrencyStamp]     nvarchar(max)    NULL,
+    [PhoneNumber]          nvarchar(max)    NULL,
+    [PhoneNumberConfirmed] bit              NOT NULL,
+    [TwoFactorEnabled]     bit              NOT NULL,
+    [LockoutEnd]           datetimeoffset   NULL,
+    [LockoutEnabled]       bit              NOT NULL,
+    [AccessFailedCount]    int              NOT NULL,
+    CONSTRAINT [PK_AspNetUsers] PRIMARY KEY ([Id])
+);
+
+
+CREATE TABLE [AspNetRoleClaims] (
+    [Id]         int              NOT NULL IDENTITY,
+    [RoleId]     uniqueidentifier NOT NULL,
+    [ClaimType]  nvarchar(max)    NULL,
+    [ClaimValue] nvarchar(max)    NULL,
+    CONSTRAINT [PK_AspNetRoleClaims] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_AspNetRoleClaims_AspNetRoles_RoleId]
+        FOREIGN KEY ([RoleId]) REFERENCES [AspNetRoles] ([Id]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [AspNetUserClaims] (
+    [Id]         int              NOT NULL IDENTITY,
+    [UserId]     uniqueidentifier NOT NULL,
+    [ClaimType]  nvarchar(max)    NULL,
+    [ClaimValue] nvarchar(max)    NULL,
+    CONSTRAINT [PK_AspNetUserClaims] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_AspNetUserClaims_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [AspNetUserLogins] (
+    [LoginProvider]       nvarchar(128)    NOT NULL,
+    [ProviderKey]         nvarchar(128)    NOT NULL,
+    [ProviderDisplayName] nvarchar(max)    NULL,
+    [UserId]              uniqueidentifier NOT NULL,
+    CONSTRAINT [PK_AspNetUserLogins] PRIMARY KEY ([LoginProvider], [ProviderKey]),
+    CONSTRAINT [FK_AspNetUserLogins_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE [AspNetUserRoles] (
+    [UserId] uniqueidentifier NOT NULL,
+    [RoleId] uniqueidentifier NOT NULL,
+    CONSTRAINT [PK_AspNetUserRoles] PRIMARY KEY ([UserId], [RoleId]),
+    CONSTRAINT [FK_AspNetUserRoles_AspNetRoles_RoleId]
+        FOREIGN KEY ([RoleId]) REFERENCES [AspNetRoles] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_AspNetUserRoles_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [AspNetUserTokens] (
+    [UserId]        uniqueidentifier NOT NULL,
+    [LoginProvider] nvarchar(128)    NOT NULL,
+    [Name]          nvarchar(128)    NOT NULL,
+    [Value]         nvarchar(max)    NULL,
+    CONSTRAINT [PK_AspNetUserTokens] PRIMARY KEY ([UserId], [LoginProvider], [Name]),
+    CONSTRAINT [FK_AspNetUserTokens_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [Credentials] (
+    [CredentialId]   uniqueidentifier NOT NULL,
+    [CredentialName] nvarchar(50)     NOT NULL,
+    [UserId]         uniqueidentifier NOT NULL,
+    [CreatedAt]      datetime2        NOT NULL,
+    [LastEditedAt]   datetime2        NOT NULL,
+    CONSTRAINT [PK_Credentials] PRIMARY KEY ([CredentialId]),
+    CONSTRAINT [FK_Credentials_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [CredentialAccesses] (
+    [CredentialAccessId] uniqueidentifier NOT NULL,
+    [CredentialId]       uniqueidentifier NOT NULL,
+    [UserId]             uniqueidentifier NOT NULL,
+    [PermissionLevel]    nvarchar(50)     NOT NULL,
+    [ExpireAt]           datetime2        NOT NULL,
+    [SharedAt]           datetime2        NOT NULL,
+    [SharedByUserId]     uniqueidentifier NOT NULL,
+    CONSTRAINT [PK_CredentialAccesses] PRIMARY KEY ([CredentialAccessId]),
+    CONSTRAINT [FK_CredentialAccesses_AspNetUsers_SharedByUserId]
+        FOREIGN KEY ([SharedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CredentialAccesses_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CredentialAccesses_Credentials_CredentialId]
+        FOREIGN KEY ([CredentialId]) REFERENCES [Credentials] ([CredentialId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [WebCredentials] (
+    [WebCredentialId] uniqueidentifier NOT NULL,
+    [CredentialId]    uniqueidentifier NOT NULL,
+    [Url]             nvarchar(200)    NOT NULL,
+    [Username]        nvarchar(100)    NOT NULL,
+    [PasswordHash]    nvarchar(512)    NOT NULL,
+    [Notes]           nvarchar(100)    NULL,
+    [CreatedAt]       datetime2        NOT NULL,
+    [CreatorId]       uniqueidentifier NOT NULL,
+    [EditedAt]        datetime2        NULL,
+    [EditorId]        uniqueidentifier NULL,
+    CONSTRAINT [PK_WebCredentials] PRIMARY KEY ([WebCredentialId]),
+    CONSTRAINT [FK_WebCredentials_AspNetUsers_CreatorId]
+        FOREIGN KEY ([CreatorId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_WebCredentials_AspNetUsers_EditorId]
+        FOREIGN KEY ([EditorId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_WebCredentials_Credentials_CredentialId]
+        FOREIGN KEY ([CredentialId]) REFERENCES [Credentials] ([CredentialId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [WebCredentialAccesses] (
+    [WebCredentialAccessId] uniqueidentifier NOT NULL,
+    [WebCredentialId]       uniqueidentifier NOT NULL,
+    [UserId]                uniqueidentifier NOT NULL,
+    [PermissionLevel]       nvarchar(50)     NOT NULL,
+    [ExpireAt]              datetime2        NOT NULL,
+    [SharedAt]              datetime2        NOT NULL,
+    [SharedByUserId]        uniqueidentifier NOT NULL,
+    CONSTRAINT [PK_WebCredentialAccesses] PRIMARY KEY ([WebCredentialAccessId]),
+    CONSTRAINT [FK_WebCredentialAccesses_AspNetUsers_SharedByUserId]
+        FOREIGN KEY ([SharedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_WebCredentialAccesses_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_WebCredentialAccesses_WebCredentials_WebCredentialId]
+        FOREIGN KEY ([WebCredentialId]) REFERENCES [WebCredentials] ([WebCredentialId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [WebCredentialsHistorys] (
+    [WebCredentialHistoryId] uniqueidentifier NOT NULL,
+    [WebCredentialId]        uniqueidentifier NOT NULL,
+    [Url]                    nvarchar(200)    NOT NULL,
+    [Username]               nvarchar(100)    NOT NULL,
+    [PasswordHash]           nvarchar(512)    NOT NULL,
+    [Notes]                  nvarchar(100)    NULL,
+    [ChangedByUserId]        uniqueidentifier NULL,
+    [ChangedAt]              datetime2        NULL,
+    [ChangeType]             nvarchar(50)     NOT NULL,
+    CONSTRAINT [PK_WebCredentialsHistorys] PRIMARY KEY ([WebCredentialHistoryId]),
+    CONSTRAINT [FK_WebCredentialsHistorys_AspNetUsers_ChangedByUserId]
+        FOREIGN KEY ([ChangedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_WebCredentialsHistorys_WebCredentials_WebCredentialId]
+        FOREIGN KEY ([WebCredentialId]) REFERENCES [WebCredentials] ([WebCredentialId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [CreditCards] (
+    [CreditDebitId]  uniqueidentifier NOT NULL,
+    [CredentialId]   uniqueidentifier NOT NULL,
+    [CardHolderName] nvarchar(100)    NOT NULL,
+    [CardNumberHash] nvarchar(512)    NOT NULL,
+    [ExpiryMonth]    nvarchar(2)      NOT NULL,
+    [ExpiryYear]     nvarchar(2)      NOT NULL,
+    [CvvHash]        nvarchar(512)    NOT NULL,
+    [PinHash]        nvarchar(512)    NOT NULL,
+    [BillingAddress] nvarchar(100)    NULL,
+    [Notes]          nvarchar(200)    NULL,
+    [CreatedAt]      datetime2        NOT NULL,
+    [CreatorId]      uniqueidentifier NOT NULL,
+    [EditedAt]       datetime2        NULL,
+    [EditorId]       uniqueidentifier NULL,
+    CONSTRAINT [PK_CreditCards] PRIMARY KEY ([CreditDebitId]),
+    CONSTRAINT [FK_CreditCards_AspNetUsers_CreatorId]
+        FOREIGN KEY ([CreatorId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CreditCards_AspNetUsers_EditorId]
+        FOREIGN KEY ([EditorId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CreditCards_Credentials_CredentialId]
+        FOREIGN KEY ([CredentialId]) REFERENCES [Credentials] ([CredentialId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [CreditDebitCardAccesses] (
+    [CreditDebitAccessId] uniqueidentifier NOT NULL,
+    [CreditDebitId]       uniqueidentifier NOT NULL,
+    [UserId]              uniqueidentifier NOT NULL,
+    [PermissionLevel]     nvarchar(50)     NOT NULL,
+    [ExpireAt]            datetime2        NOT NULL,
+    [SharedAt]            datetime2        NOT NULL,
+    [SharedByUserId]      uniqueidentifier NOT NULL,
+    CONSTRAINT [PK_CreditDebitCardAccesses] PRIMARY KEY ([CreditDebitAccessId]),
+    CONSTRAINT [FK_CreditDebitCardAccesses_AspNetUsers_SharedByUserId]
+        FOREIGN KEY ([SharedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CreditDebitCardAccesses_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CreditDebitCardAccesses_CreditCards_CreditDebitId]
+        FOREIGN KEY ([CreditDebitId]) REFERENCES [CreditCards] ([CreditDebitId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [CreditCardsHistorys] (
+    [CreditDebitHistoryId] uniqueidentifier NOT NULL,
+    [CreditDebitId]        uniqueidentifier NOT NULL,
+    [CardHolderName]       nvarchar(100)    NOT NULL,
+    [CardNumberHash]       nvarchar(512)    NOT NULL,
+    [ExpiryMonth]          nvarchar(2)      NOT NULL,
+    [ExpiryYear]           nvarchar(2)      NOT NULL,
+    [CvvHash]              nvarchar(512)    NOT NULL,
+    [PinHash]              nvarchar(512)    NOT NULL,
+    [BillingAddress]       nvarchar(100)    NULL,
+    [Notes]                nvarchar(200)    NULL,
+    [ChangedByUserId]      uniqueidentifier NULL,
+    [ChangedAt]            datetime2        NOT NULL,
+    [ChangeType]           nvarchar(50)     NOT NULL,
+    CONSTRAINT [PK_CreditCardsHistorys] PRIMARY KEY ([CreditDebitHistoryId]),
+    CONSTRAINT [FK_CreditCardsHistorys_AspNetUsers_ChangedByUserId]
+        FOREIGN KEY ([ChangedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_CreditCardsHistorys_CreditCards_CreditDebitId]
+        FOREIGN KEY ([CreditDebitId]) REFERENCES [CreditCards] ([CreditDebitId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [SecurityKeys] (
+    [SecurityKeyId] uniqueidentifier NOT NULL,
+    [CredentialId]  uniqueidentifier NOT NULL,
+    [Label]         nvarchar(100)    NOT NULL,
+    [PinHash]       nvarchar(512)    NOT NULL,
+    [Notes]         nvarchar(200)    NULL,
+    [CreatedAt]     datetime2        NOT NULL,
+    [CreatorId]     uniqueidentifier NOT NULL,
+    [EditedAt]      datetime2        NULL,
+    [EditorId]      uniqueidentifier NULL,
+    CONSTRAINT [PK_SecurityKeys] PRIMARY KEY ([SecurityKeyId]),
+    CONSTRAINT [FK_SecurityKeys_AspNetUsers_CreatorId]
+        FOREIGN KEY ([CreatorId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_SecurityKeys_AspNetUsers_EditorId]
+        FOREIGN KEY ([EditorId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_SecurityKeys_Credentials_CredentialId]
+        FOREIGN KEY ([CredentialId]) REFERENCES [Credentials] ([CredentialId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [SecurityKeyAccesses] (
+    [SecurityKeyAccessId] uniqueidentifier NOT NULL,
+    [SecurityKeyId]       uniqueidentifier NOT NULL,
+    [UserId]              uniqueidentifier NOT NULL,
+    [PermissionLevel]     nvarchar(50)     NOT NULL,
+    [ExpireAt]            datetime2        NOT NULL,
+    [SharedAt]            datetime2        NOT NULL,
+    [SharedByUserId]      uniqueidentifier NOT NULL,
+    CONSTRAINT [PK_SecurityKeyAccesses] PRIMARY KEY ([SecurityKeyAccessId]),
+    CONSTRAINT [FK_SecurityKeyAccesses_AspNetUsers_SharedByUserId]
+        FOREIGN KEY ([SharedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_SecurityKeyAccesses_AspNetUsers_UserId]
+        FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_SecurityKeyAccesses_SecurityKeys_SecurityKeyId]
+        FOREIGN KEY ([SecurityKeyId]) REFERENCES [SecurityKeys] ([SecurityKeyId]) ON DELETE CASCADE
+);
+
+
+CREATE TABLE [SecurityKeysHistorys] (
+    [SecurityKeyHistoryId] uniqueidentifier NOT NULL,
+    [SecurityKeyId]        uniqueidentifier NOT NULL,
+    [Label]                nvarchar(100)    NOT NULL,
+    [PinHash]              nvarchar(512)    NOT NULL,
+    [Notes]                nvarchar(200)    NULL,
+    [ChangedByUserId]      uniqueidentifier NOT NULL,
+    [ChangedAt]            datetime2        NOT NULL,
+    [ChangeType]           nvarchar(50)     NOT NULL,
+    CONSTRAINT [PK_SecurityKeysHistorys] PRIMARY KEY ([SecurityKeyHistoryId]),
+    CONSTRAINT [FK_SecurityKeysHistorys_AspNetUsers_ChangedByUserId]
+        FOREIGN KEY ([ChangedByUserId]) REFERENCES [AspNetUsers] ([Id]),
+    CONSTRAINT [FK_SecurityKeysHistorys_SecurityKeys_SecurityKeyId]
+        FOREIGN KEY ([SecurityKeyId]) REFERENCES [SecurityKeys] ([SecurityKeyId]) ON DELETE CASCADE
+);
+
+
+
+CREATE INDEX [IX_AspNetRoleClaims_RoleId]   ON [AspNetRoleClaims] ([RoleId]);
+CREATE INDEX [IX_AspNetUserClaims_UserId]   ON [AspNetUserClaims] ([UserId]);
+CREATE INDEX [IX_AspNetUserLogins_UserId]   ON [AspNetUserLogins] ([UserId]);
+CREATE INDEX [IX_AspNetUserRoles_RoleId]    ON [AspNetUserRoles]  ([RoleId]);
+CREATE INDEX [EmailIndex]                   ON [AspNetUsers]      ([NormalizedEmail]);
+
+CREATE UNIQUE INDEX [RoleNameIndex] ON [AspNetRoles] ([NormalizedName])
+    WHERE [NormalizedName] IS NOT NULL;
+
+CREATE UNIQUE INDEX [UserNameIndex] ON [AspNetUsers] ([NormalizedUserName])
+    WHERE [NormalizedUserName] IS NOT NULL;
+
+
+CREATE INDEX [IX_Credentials_UserId]              ON [Credentials]       ([UserId]);
+CREATE INDEX [IX_CredentialAccesses_CredentialId] ON [CredentialAccesses] ([CredentialId]);
+CREATE INDEX [IX_CredentialAccesses_UserId]        ON [CredentialAccesses] ([UserId]);
+CREATE INDEX [IX_CredentialAccesses_SharedByUserId] ON [CredentialAccesses] ([SharedByUserId]);
+
+
+CREATE INDEX [IX_WebCredentials_CredentialId]          ON [WebCredentials]        ([CredentialId]);
+CREATE INDEX [IX_WebCredentials_CreatorId]              ON [WebCredentials]        ([CreatorId]);
+CREATE INDEX [IX_WebCredentials_EditorId]               ON [WebCredentials]        ([EditorId]);
+CREATE INDEX [IX_WebCredentialAccesses_WebCredentialId] ON [WebCredentialAccesses] ([WebCredentialId]);
+CREATE INDEX [IX_WebCredentialAccesses_UserId]          ON [WebCredentialAccesses] ([UserId]);
+CREATE INDEX [IX_WebCredentialAccesses_SharedByUserId]  ON [WebCredentialAccesses] ([SharedByUserId]);
+CREATE INDEX [IX_WebCredentialsHistorys_WebCredentialId] ON [WebCredentialsHistorys] ([WebCredentialId]);
+CREATE INDEX [IX_WebCredentialsHistorys_ChangedByUserId] ON [WebCredentialsHistorys] ([ChangedByUserId]);
+
+
+CREATE INDEX [IX_CreditCards_CredentialId]             ON [CreditCards]            ([CredentialId]);
+CREATE INDEX [IX_CreditCards_CreatorId]                ON [CreditCards]            ([CreatorId]);
+CREATE INDEX [IX_CreditCards_EditorId]                 ON [CreditCards]            ([EditorId]);
+CREATE INDEX [IX_CreditDebitCardAccesses_CreditDebitId] ON [CreditDebitCardAccesses] ([CreditDebitId]);
+CREATE INDEX [IX_CreditDebitCardAccesses_UserId]        ON [CreditDebitCardAccesses] ([UserId]);
+CREATE INDEX [IX_CreditDebitCardAccesses_SharedByUserId] ON [CreditDebitCardAccesses] ([SharedByUserId]);
+CREATE INDEX [IX_CreditCardsHistorys_CreditDebitId]    ON [CreditCardsHistorys]    ([CreditDebitId]);
+CREATE INDEX [IX_CreditCardsHistorys_ChangedByUserId]  ON [CreditCardsHistorys]    ([ChangedByUserId]);
+
+
+CREATE INDEX [IX_SecurityKeys_CredentialId]            ON [SecurityKeys]        ([CredentialId]);
+CREATE INDEX [IX_SecurityKeys_CreatorId]               ON [SecurityKeys]        ([CreatorId]);
+CREATE INDEX [IX_SecurityKeys_EditorId]                ON [SecurityKeys]        ([EditorId]);
+CREATE INDEX [IX_SecurityKeyAccesses_SecurityKeyId]    ON [SecurityKeyAccesses] ([SecurityKeyId]);
+CREATE INDEX [IX_SecurityKeyAccesses_UserId]           ON [SecurityKeyAccesses] ([UserId]);
+CREATE INDEX [IX_SecurityKeyAccesses_SharedByUserId]   ON [SecurityKeyAccesses] ([SharedByUserId]);
+CREATE INDEX [IX_SecurityKeysHistorys_SecurityKeyId]   ON [SecurityKeysHistorys] ([SecurityKeyId]);
+CREATE INDEX [IX_SecurityKeysHistorys_ChangedByUserId] ON [SecurityKeysHistorys] ([ChangedByUserId]);
