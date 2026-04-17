@@ -5,12 +5,19 @@ A secure password manager built with ASP.NET Core, Javascript and Razor Pages. S
 ## Features
 
 Secured Vault — Store Encrypted web logins, credit/debit cards, and security keys, with extra pin layer for security
+
 Folder Organization — Group credentials into named folders
+
 My items tab — A personal list of all your individually saved credentials
+
 Item-Level sharing — Share individual items with other users with View or Edit permissions and expiry dates
+
 Folder-Level sharing — Share entire folders with family members, friends or colleagues
+
 Edit history — Every change is tracked with who edit it, easily audited
+
 Shared item tab — See everything shared with you in one place, with history and edit access
+
 Delete account — Full account deletion with safe cleanup of personal data and all shared access records
 
 ##Stack
@@ -32,7 +39,7 @@ Delete account — Full account deletion with safe cleanup of personal data and 
 
 1. **Clone the repo**
 
-2. **Configure the database** — update `appsettings.json` with your connection string:
+2. **Configure database** — update `appsettings.json` with your connection string:
 
 3. **Run migrations** — in Visual Studio Package Manager Console:
 
@@ -41,21 +48,7 @@ Delete account — Full account deletion with safe cleanup of personal data and 
 ## Project Structure
 
 ```
-FPasswordManager/
-├── Areas/
-│   └── Identity/
-│       └── Pages/         # Login, register, manage profile
-├── Controllers/           # API controllers (credentials, access, items)
-├── Data/
-│   └── AppDbContext.cs    # EF Core context
-├── Models/                # Entity models
-├── Pages/                 # Razor Pages (dashboard, vault, shared items)
-├── Services/              # Business logic (item CRUD, access, sharing)
-├── wwwroot/
-│   ├── css/               # site.css — full dark theme
-│   └── js/                # index.js, vault.js, shareditems.js
-├── appsettings.json
-└── Program.cs
+
 ```
 
 
