@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace FamilyPasswordManager.Data
+namespace FPasswordManager.Data
 {
     public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
@@ -26,14 +26,12 @@ namespace FamilyPasswordManager.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            
             modelBuilder.Entity<Credential>()
                 .HasOne(c => c.User)
                 .WithMany(u => u.Credentials)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            
             modelBuilder.Entity<CredentialAccess>()
                 .HasOne(ca => ca.Credential)
                 .WithMany(c => c.CredentialAccesses)
@@ -52,7 +50,6 @@ namespace FamilyPasswordManager.Data
                 .HasForeignKey(ca => ca.SharedByUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
             modelBuilder.Entity<WebCredential>()
                 .HasOne(w => w.Credential)
                 .WithMany()
@@ -71,7 +68,6 @@ namespace FamilyPasswordManager.Data
                 .HasForeignKey(w => w.EditorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
             modelBuilder.Entity<WebCredentialAccess>()
                 .HasOne(wa => wa.WebCredential)
                 .WithMany(w => w.Accesses)
@@ -90,12 +86,11 @@ namespace FamilyPasswordManager.Data
                 .HasForeignKey(wa => wa.SharedByUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
             modelBuilder.Entity<WebCredentialHistory>()
                 .HasOne(h => h.WebCredential)
                 .WithMany()
                 .HasForeignKey(h => h.WebCredentialId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<WebCredentialHistory>()
                 .HasOne(h => h.ChangedByUser)
@@ -103,7 +98,6 @@ namespace FamilyPasswordManager.Data
                 .HasForeignKey(h => h.ChangedByUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
             modelBuilder.Entity<CreditDebitCard>()
                 .HasOne(c => c.Credential)
                 .WithMany()
@@ -122,7 +116,6 @@ namespace FamilyPasswordManager.Data
                 .HasForeignKey(c => c.EditorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
             modelBuilder.Entity<CreditDebitCardAccess>()
                 .HasOne(ca => ca.CreditDebitCard)
                 .WithMany(c => c.Accesses)
@@ -153,7 +146,6 @@ namespace FamilyPasswordManager.Data
                 .HasForeignKey(h => h.ChangedByUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
             modelBuilder.Entity<SecurityKey>()
                 .HasOne(s => s.Credential)
                 .WithMany()

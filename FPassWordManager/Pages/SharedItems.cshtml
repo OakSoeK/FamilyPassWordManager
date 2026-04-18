@@ -1,0 +1,230 @@
+﻿@page
+@model SharedItemsModel
+@{
+    ViewData["Title"] = "Shared items";
+}
+
+<!-- PIN Gate -->
+<div id="pin-gate" class="pin-gate">
+    <div class="pin-box">
+        <div class="auth-icon" style="margin:0 auto 1.25rem;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <rect x="3" y="10" width="16" height="11" rx="2.5" fill="currentColor" opacity="0.85" />
+                <path d="M7 10V7.5a4 4 0 0 1 8 0V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" />
+                <circle cx="11" cy="15.5" r="1.5" fill="white" opacity="0.8" />
+            </svg>
+        </div>
+        <h2 class="auth-title" style="text-align:center">Enter your PIN</h2>
+        <p class="auth-subtitle" style="text-align:center">Verify your identity to view shared items</p>
+        <div class="form-group">
+            <input class="form-control pin-input" id="pin-input" type="password"
+                   maxlength="5" inputmode="numeric" placeholder="•••••"
+                   style="text-align:center;font-size:22px;letter-spacing:0.4em;" />
+        </div>
+        <p id="pin-error" class="field-error" style="text-align:center;min-height:18px;"></p>
+        <button class="btn-vault" id="pin-submit-btn" style="width:100%;margin-top:0.5rem">Unlock</button>
+    </div>
+</div>
+
+<!-- Page content-->
+<div id="page-content" style="display:none">
+    <div class="vault-page">
+
+        <div class="vault-header">
+            <a href="/" class="back-link">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Vault
+            </a>
+            <div class="vault-title-row">
+                <div class="vault-folder-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="14" cy="5" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+                        <circle cx="5" cy="10" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+                        <circle cx="14" cy="15" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+                        <path d="M7 9l5-3M7 11l5 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <h1 class="vault-name">Shared items</h1>
+            </div>
+        </div>
+
+        <!-- Filter GP -->
+        <div class="section-action-bar" style="margin-bottom:14px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                <button class="filter-btn" onclick="setFilter('web', this)">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7 1.5C5.5 4 5 5.5 5 7s.5 3 2 5.5M7 1.5C8.5 4 9 5.5 9 7s-.5 3-2 5.5M1.5 7h11" stroke="currentColor" stroke-width="1" stroke-linecap="round" /></svg>
+                    Logins
+                </button>
+                <button class="filter-btn" onclick="setFilter('card', this)">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M1 6h12" stroke="currentColor" stroke-width="1.2" /></svg>
+                    Cards
+                </button>
+                <button class="filter-btn" onclick="setFilter('key', this)">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="3" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7.5 7.5L12 12M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
+                    Keys
+                </button>
+            </div>
+            <span class="section-count" id="items-count">—</span>
+        </div>
+
+        <div id="items-list" class="item-list">
+            <div class="loading-row"><span class="spinner"></span></div>
+        </div>
+    </div>
+
+    <!-- Detail-->
+    <div class="modal-backdrop" id="modal-detail" onclick="closeModal('modal-detail')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="detail-title">Details</span>
+                <button class="modal-close" onclick="closeModal('modal-detail')">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="detail-body"></div>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="modal-backdrop" id="modal-history" onclick="closeModal('modal-history')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>Edit history</span>
+                <button class="modal-close" onclick="closeModal('modal-history')">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="history-body">
+                <div class="loading-row"><span class="spinner"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Edit -->
+    <div class="modal-backdrop" id="modal-shared-edit" onclick="closeModal('modal-shared-edit')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="se-modal-title">Edit item</span>
+                <button class="modal-close" onclick="closeModal('modal-shared-edit')">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Web login fields -->
+                <div id="se-web-panel">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">URL</label>
+                            <input class="form-control" id="se-url" placeholder="https://example.com" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input class="form-control" id="se-username" placeholder="you@example.com" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password <span style="color:var(--text-muted);font-size:12px">(leave blank to keep)</span></label>
+                        <div class="input-wrapper has-reveal-btn">
+                            <input class="form-control" id="se-password" type="password" placeholder="••••••••" style="padding-right:40px" />
+                            <button class="reveal-btn" onclick="toggleReveal('se-password',this)">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                        <textarea class="form-control" id="se-notes" rows="2" placeholder="Any extra info…"></textarea>
+                    </div>
+                </div>
+
+                <!-- Card -->
+                <div id="se-card-panel" style="display:none">
+                    <div class="form-group">
+                        <label class="form-label">Cardholder name</label>
+                        <input class="form-control" id="se-holder" placeholder="Jane Smith" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Card number <span style="color:var(--text-muted);font-size:12px">(leave blank to keep)</span></label>
+                        <input class="form-control pin-input" id="se-number" placeholder="•••• •••• •••• ••••" maxlength="19" inputmode="numeric" />
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Month</label>
+                            <input class="form-control" id="se-month" placeholder="MM" maxlength="2" inputmode="numeric" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Year</label>
+                            <input class="form-control" id="se-year" placeholder="YY" maxlength="2" inputmode="numeric" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV <span style="color:var(--text-muted);font-size:12px">(leave blank)</span></label>
+                            <input class="form-control pin-input" id="se-cvv" type="password" placeholder="•••" maxlength="4" inputmode="numeric" />
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">PIN <span style="color:var(--text-muted);font-size:12px">(leave blank)</span></label>
+                            <input class="form-control pin-input" id="se-pin" type="password" placeholder="••••" maxlength="6" inputmode="numeric" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Billing address <span style="color:var(--text-muted)">(optional)</span></label>
+                            <input class="form-control" id="se-billing" placeholder="123 Main St" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                        <textarea class="form-control" id="se-cnotes" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Security key -->
+                <div id="se-key-panel" style="display:none">
+                    <div class="form-group">
+                        <label class="form-label">Label</label>
+                        <input class="form-control" id="se-label" placeholder="e.g. GitHub 2FA backup key" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PIN / Secret <span style="color:var(--text-muted);font-size:12px">(leave blank to keep)</span></label>
+                        <div class="input-wrapper has-reveal-btn">
+                            <input class="form-control pin-input" id="se-kpin" type="password" placeholder="••••••" />
+                            <button class="reveal-btn" onclick="toggleReveal('se-kpin',this)">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                        <textarea class="form-control" id="se-knotes" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <p id="se-error" class="field-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-shared-edit')">Cancel</button>
+                <button class="btn-vault btn-sm" onclick="saveSharedEdit()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'pin-submit-btn') {
+            if (typeof submitPin === 'function') submitPin();
+        }
+    });
+</script>
+<script src="~/js/shareditems.js" asp-append-version="true"></script>
+
+<script>
+    function toggleReveal(inputId, btn) {
+        var inp = document.getElementById(inputId);
+        inp.type = (inp.type === 'text') ? 'password' : 'text';
+        btn.style.opacity = (inp.type === 'text') ? '1' : '0.5';
+    }
+</script>

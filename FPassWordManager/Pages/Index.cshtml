@@ -1,0 +1,301 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Vault";
+}
+
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <div class="landing">
+        <div class="landing-glow"></div>
+        <div class="landing-content">
+            <div class="landing-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect x="4" y="14" width="24" height="16" rx="3.5" fill="currentColor" opacity="0.8" />
+                    <path d="M10 14V10a6 6 0 0 1 12 0v4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                    <circle cx="16" cy="22" r="2.5" fill="white" opacity="0.75" />
+                </svg>
+            </div>
+            <h1 class="landing-title">FamilyPasswordManager</h1>
+            <p class="landing-desc">Securely store passwords, cards, and key-codes.<br />Share them with your friends and family.</p>
+            <div class="landing-actions">
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn-vault">Get started free</a>
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn-ghost">Sign in</a>
+            </div>
+            <div class="landing-features">
+                <div class="feat"><span class="feat-dot"></span>Secured storage</div>
+                <div class="feat"><span class="feat-dot"></span>Sharing functionality</div>
+                <div class="feat"><span class="feat-dot"></span>Edit history</div>
+            </div>
+        </div>
+    </div>
+    return;
+}
+
+<div class="dashboard">
+    <div class="dash-header">
+        <div>
+            <h1 class="dash-title">My vault</h1>
+            <p class="dash-subtitle" id="dash-stats">Loading…</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-ghost btn-sm" onclick="openNewCredentialModal()">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                    <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                New folder
+            </button>
+            <button class="btn-vault btn-sm" onclick="openAddItemModal()">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                    <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                Add item
+            </button>
+        </div>
+    </div>
+
+    <div class="stat-strip">
+        <div class="stat-card">
+            <span class="stat-num" id="st-folders">—</span>
+            <span class="stat-label">Folders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num" id="st-shared">—</span>
+            <span class="stat-label">Shared with me</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num" id="st-expiring">—</span>
+            <span class="stat-label">Expiring soon</span>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('mine', this)">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <path d="M2 5A1.5 1.5 0 0 1 3.5 3.5H6l1.5 1.5H11A1.5 1.5 0 0 1 12.5 6.5V11A1.5 1.5 0 0 1 11 12.5H3A1.5 1.5 0 0 1 1.5 11V5z" stroke="currentColor" stroke-width="1.2" fill="none" />
+            </svg>
+            My folders
+        </button>
+        <button class="tab-btn" onclick="switchTab('my-items', this)">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none" />
+                <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none" />
+                <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none" />
+                <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none" />
+            </svg>
+            My items
+        </button>
+        <button class="tab-btn" onclick="switchTab('shared-folders', this)">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <path d="M2 5A1.5 1.5 0 0 1 3.5 3.5H6l1.5 1.5H11A1.5 1.5 0 0 1 12.5 6.5V11A1.5 1.5 0 0 1 11 12.5H3A1.5 1.5 0 0 1 1.5 11V5z" stroke="currentColor" stroke-width="1.2" fill="none" />
+            </svg>
+            Shared folders
+        </button>
+        <button class="tab-btn" onclick="switchTab('shared-items', this)">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <circle cx="10" cy="3" r="1.5" stroke="currentColor" stroke-width="1.2" />
+                <circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2" />
+                <circle cx="10" cy="11" r="1.5" stroke="currentColor" stroke-width="1.2" />
+                <path d="M4.5 6.2L8.5 3.8M4.5 7.8l4 2.4" stroke="currentColor" stroke-width="1.2" />
+            </svg>
+            Shared items
+        </button>
+    </div>
+
+    <!-- My credentials tab -->
+    <div id="tab-mine">
+        <div id="cred-grid" class="cred-grid">
+            <div class="loading-row"><span class="spinner"></span> Loading your vault…</div>
+        </div>
+    </div>
+
+    <!-- Shared folders tab -->
+    <div id="tab-shared-folders" style="display:none">
+        <div id="shared-folders-list" class="shared-list">
+            <div class="loading-row"><span class="spinner"></span> Loading…</div>
+        </div>
+    </div>
+</div>
+
+<!-- New/Edit Credential-->
+<div class="modal-backdrop" id="modal-credential" onclick="closeModal('modal-credential')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span id="modal-cred-title">New folder</span>
+            <button class="modal-close" onclick="closeModal('modal-credential')">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <label class="form-label">Folder name</label>
+            <input class="form-control" id="cred-name-input" placeholder="e.g. Social media, Banking…" maxlength="50" />
+            <p id="cred-error" class="field-error"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeModal('modal-credential')">Cancel</button>
+            <button class="btn-vault btn-sm" onclick="saveCredential()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirm -->
+<div class="modal-backdrop" id="modal-delete" onclick="closeModal('modal-delete')">
+    <div class="modal-box modal-sm" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span>Delete folder</span>
+            <button class="modal-close" onclick="closeModal('modal-delete')">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p style="color:var(--text-secondary);font-size:14px;line-height:1.65">
+                This permanently deletes <strong id="delete-cred-name" style="color:var(--text-primary)"></strong>
+                and everything inside it — web logins, cards, and security keys. This cannot be undone.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeModal('modal-delete')">Cancel</button>
+            <button class="btn-danger btn-sm" onclick="confirmDelete()">Delete forever</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Item -->
+<div class="modal-backdrop" id="modal-add-item" onclick="closeModal('modal-add-item')">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px">
+        <div class="modal-header">
+            <span id="add-item-title">Add item</span>
+            <button class="modal-close" onclick="closeModal('modal-add-item')">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <!-- Type selector -->
+            <div style="display:flex;gap:6px;margin-bottom:1.25rem">
+                <button class="filter-btn active" id="type-btn-web" onclick="selectItemType('web')">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7 1.5C5.5 4 5 5.5 5 7s.5 3 2 5.5M7 1.5C8.5 4 9 5.5 9 7s-.5 3-2 5.5M1.5 7h11" stroke="currentColor" stroke-width="1" stroke-linecap="round" /></svg>
+                    Web login
+                </button>
+                <button class="filter-btn" id="type-btn-card" onclick="selectItemType('card')">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M1 6h12" stroke="currentColor" stroke-width="1.2" /></svg>
+                    Card
+                </button>
+                <button class="filter-btn" id="type-btn-key" onclick="selectItemType('key')">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="3" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7.5 7.5L12 12M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
+                    Security key
+                </button>
+            </div>
+
+            <!-- Web login fields -->
+            <div id="add-item-web">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">URL</label>
+                        <input class="form-control" id="aiw-url" placeholder="https://example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input class="form-control" id="aiw-username" placeholder="you@example.com" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <input class="form-control" id="aiw-password" type="password" placeholder="••••••••" style="padding-right:40px" />
+                        <button class="reveal-btn" onclick="toggleReveal('aiw-password',this)">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                    <textarea class="form-control" id="aiw-notes" rows="2" placeholder="Any extra info…"></textarea>
+                </div>
+            </div>
+
+            <!-- Card fields -->
+            <div id="add-item-card" style="display:none">
+                <div class="form-group">
+                    <label class="form-label">Cardholder name</label>
+                    <input class="form-control" id="aic-holder" placeholder="Jane Smith" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Card number</label>
+                    <input class="form-control pin-input" id="aic-number" placeholder="•••• •••• •••• ••••" maxlength="19" inputmode="numeric" />
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Month</label>
+                        <input class="form-control" id="aic-month" placeholder="MM" maxlength="2" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <input class="form-control" id="aic-year" placeholder="YY" maxlength="2" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV</label>
+                        <input class="form-control pin-input" id="aic-cvv" type="password" placeholder="•••" maxlength="4" inputmode="numeric" />
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">PIN</label>
+                        <input class="form-control pin-input" id="aic-pin" type="password" placeholder="••••" maxlength="6" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Billing address <span style="color:var(--text-muted)">(optional)</span></label>
+                        <input class="form-control" id="aic-billing" placeholder="123 Main St" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                    <textarea class="form-control" id="aic-notes" rows="2" placeholder="Any extra info…"></textarea>
+                </div>
+            </div>
+
+            <!-- Security key fields -->
+            <div id="add-item-key" style="display:none">
+                <div class="form-group">
+                    <label class="form-label">Label</label>
+                    <input class="form-control" id="aik-label" placeholder="e.g. GitHub 2FA backup key" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN / Secret</label>
+                    <div class="input-wrapper">
+                        <input class="form-control pin-input" id="aik-pin" type="password" placeholder="••••••" />
+                        <button class="reveal-btn" onclick="toggleReveal('aik-pin',this)">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                    <textarea class="form-control" id="aik-notes" rows="2" placeholder="Where this key is used…"></textarea>
+                </div>
+            </div>
+
+            <p id="add-item-error" class="field-error"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeModal('modal-add-item')">Cancel</button>
+            <button class="btn-vault btn-sm" onclick="saveAddItem()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal for my items -->
+<div class="modal-backdrop" id="modal-item-detail" onclick="closeModal('modal-item-detail')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span id="item-detail-title">Details</span>
+            <button class="modal-close" onclick="closeModal('modal-item-detail')">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+            </button>
+        </div>
+        <div class="modal-body" id="item-detail-body"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/index.js" asp-append-version="true"></script>
+}

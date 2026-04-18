@@ -26,6 +26,7 @@ namespace FPassWordManager.Services
         Task<WebCredentialDto?> UpdateAsync(Guid webCredentialId, Guid userId, UpdateWebCredentialDto dto);
         Task<bool> DeleteAsync(Guid webCredentialId, Guid userId);
         Task<IEnumerable<WebCredentialHistoryDto>> GetHistoryAsync(Guid webCredentialId, Guid userId);
+        Task<RevealWebDto?> RevealAsync(Guid webCredentialId, Guid userId);
     }
 
     public interface ICreditDebitCardService
@@ -36,6 +37,7 @@ namespace FPassWordManager.Services
         Task<CreditDebitCardDto?> UpdateAsync(Guid creditDebitId, Guid userId, UpdateCreditDebitCardDto dto);
         Task<bool> DeleteAsync(Guid creditDebitId, Guid userId);
         Task<IEnumerable<CreditDebitCardHistoryDto>> GetHistoryAsync(Guid creditDebitId, Guid userId);
+        Task<RevealCardDto?> RevealAsync(Guid creditDebitId, Guid userId);
     }
 
     public interface ISecurityKeyService
@@ -46,6 +48,27 @@ namespace FPassWordManager.Services
         Task<SecurityKeyDto?> UpdateAsync(Guid securityKeyId, Guid userId, UpdateSecurityKeyDto dto);
         Task<bool> DeleteAsync(Guid securityKeyId, Guid userId);
         Task<IEnumerable<SecurityKeyHistoryDto>> GetHistoryAsync(Guid securityKeyId, Guid userId);
+        Task<RevealKeyDto?> RevealAsync(Guid securityKeyId, Guid userId);
+    }
+
+    public interface IItemAccessService
+    {
+        Task<IEnumerable<ItemAccessDto>> GetWebAccessListAsync(Guid webCredentialId, Guid requesterId);
+        Task<ItemAccessDto> GrantWebAccessAsync(Guid webCredentialId, Guid ownerId, GrantItemAccessDto dto);
+        Task<bool> RevokeWebAccessAsync(Guid accessId, Guid ownerId);
+        Task<bool> HasWebAccessAsync(Guid webCredentialId, Guid userId, string required = "View");
+
+        Task<IEnumerable<ItemAccessDto>> GetCardAccessListAsync(Guid creditDebitId, Guid requesterId);
+        Task<ItemAccessDto> GrantCardAccessAsync(Guid creditDebitId, Guid ownerId, GrantItemAccessDto dto);
+        Task<bool> RevokeCardAccessAsync(Guid accessId, Guid ownerId);
+        Task<bool> HasCardAccessAsync(Guid creditDebitId, Guid userId, string required = "View");
+
+        Task<IEnumerable<ItemAccessDto>> GetKeyAccessListAsync(Guid securityKeyId, Guid requesterId);
+        Task<ItemAccessDto> GrantKeyAccessAsync(Guid securityKeyId, Guid ownerId, GrantItemAccessDto dto);
+        Task<bool> RevokeKeyAccessAsync(Guid accessId, Guid ownerId);
+        Task<bool> HasKeyAccessAsync(Guid securityKeyId, Guid userId, string required = "View");
+
+        Task<IEnumerable<SharedItemDto>> GetAllSharedWithMeAsync(Guid userId);
     }
 
     public interface IAccessService
@@ -55,7 +78,6 @@ namespace FPassWordManager.Services
         Task<AccessDto> GrantAccessAsync(Guid ownerId, GrantAccessDto dto);
         Task<bool> RevokeAccessAsync(Guid credentialAccessId, Guid ownerId);
         Task<bool> HasAccessAsync(Guid credentialId, Guid userId, string requiredPermission = "View");
-        // Returns: "Owner" | "Edit" | "View" | "None"
         Task<string> GetMyPermissionAsync(Guid credentialId, Guid userId);
     }
 }

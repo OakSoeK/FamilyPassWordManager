@@ -1,0 +1,478 @@
+﻿@page
+@model VaultModel
+@{
+    ViewData["Title"] = "Vault";
+}
+
+<!-- PIN Gate -->
+<div id="pin-gate" class="pin-gate">
+    <div class="pin-box">
+        <div class="auth-icon" style="margin:0 auto 1.25rem;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <rect x="3" y="10" width="16" height="11" rx="2.5" fill="currentColor" opacity="0.85" />
+                <path d="M7 10V7.5a4 4 0 0 1 8 0V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" />
+                <circle cx="11" cy="15.5" r="1.5" fill="white" opacity="0.8" />
+            </svg>
+        </div>
+        <h2 class="auth-title" style="text-align:center">Enter your PIN</h2>
+        <p class="auth-subtitle" style="text-align:center">Verify your identity to access this vault</p>
+        <div class="form-group">
+            <input class="form-control pin-input" id="pin-input" type="password"
+                   maxlength="5" inputmode="numeric" placeholder="•••••"
+                   style="text-align:center;font-size:22px;letter-spacing:0.4em;" />
+        </div>
+        <p id="pin-error" class="field-error" style="text-align:center;min-height:18px;"></p>
+        <button class="btn-vault" id="pin-submit-btn" style="width:100%;margin-top:0.5rem">Unlock</button>
+    </div>
+</div>
+
+<!-- Vault content hidden before pin verifi -->
+<div id="vault-content" style="display:none">
+    <div class="vault-page">
+
+        <div class="vault-header">
+            <a href="/" class="back-link">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Vault
+            </a>
+            <div class="vault-title-row">
+                <div class="vault-folder-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M2 6A1.5 1.5 0 0 1 3.5 4.5H8l2 2h6.5A1.5 1.5 0 0 1 18 8v8A1.5 1.5 0 0 1 16.5 17.5h-13A1.5 1.5 0 0 1 2 16V6z" fill="currentColor" opacity="0.7" />
+                    </svg>
+                </div>
+                <h1 class="vault-name" id="vault-name">Loading…</h1>
+                <span id="perm-badge" class="badge" style="margin-left:8px"></span>
+            </div>
+        </div>
+
+        <!--folder tab-->
+        <div class="tab-bar" id="vault-tab-bar">
+            <button class="tab-btn active" onclick="switchVaultTab('web', this)">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" fill="none" /><path d="M7 1.5C5.5 4 5 5.5 5 7s.5 3 2 5.5M7 1.5C8.5 4 9 5.5 9 7s-.5 3-2 5.5M1.5 7h11" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" /></svg>
+                Web logins
+            </button>
+            <button class="tab-btn" onclick="switchVaultTab('cards', this)">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3" fill="none" /><path d="M1 6h12" stroke="currentColor" stroke-width="1.3" /></svg>
+                Cards
+            </button>
+            <button class="tab-btn" onclick="switchVaultTab('keys', this)">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="3" stroke="currentColor" stroke-width="1.3" fill="none" /><path d="M7.5 7.5L12 12M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" /></svg>
+                Security keys
+            </button>
+            <button class="tab-btn" onclick="switchVaultTab('access', this)">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="5" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none" /><path d="M1 12c0-2.761 1.79-5 4-5M10 8v4M8 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" /></svg>
+                Access
+            </button>
+        </div>
+
+        <!-- My items -->
+        <div id="my-items-ui" style="display:none">
+            <div class="my-items-toolbar">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <button class="filter-btn active" id="mi-btn-all" onclick="setMyItemsFilter('all',   this)">All</button>
+                    <button class="filter-btn" id="mi-btn-web" onclick="setMyItemsFilter('web',   this)">
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7 1.5C5.5 4 5 5.5 5 7s.5 3 2 5.5M7 1.5C8.5 4 9 5.5 9 7s-.5 3-2 5.5M1.5 7h11" stroke="currentColor" stroke-width="1" stroke-linecap="round" /></svg>
+                        Logins
+                    </button>
+                    <button class="filter-btn" id="mi-btn-cards" onclick="setMyItemsFilter('cards', this)">
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M1 6h12" stroke="currentColor" stroke-width="1.2" /></svg>
+                        Cards
+                    </button>
+                    <button class="filter-btn" id="mi-btn-keys" onclick="setMyItemsFilter('keys',  this)">
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="3" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7.5 7.5L12 12M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
+                        Keys
+                    </button>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <span class="section-count" id="mi-count">—</span>
+                    <button class="btn-vault btn-sm" id="mi-btn-add" style="display:none" onclick="openAddItemModal()">
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                        Add item
+                    </button>
+                </div>
+            </div>
+            <div id="mi-list" class="item-list"><div class="loading-row"><span class="spinner"></span></div></div>
+        </div>
+
+        <div id="tab-web">
+            <div class="section-action-bar">
+                <span class="section-count" id="web-count">—</span>
+                <button class="btn-vault btn-sm" id="btn-add-web" style="display:none" onclick="openAddWebModal()">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                    Add login
+                </button>
+            </div>
+            <div id="web-list" class="item-list"><div class="loading-row"><span class="spinner"></span></div></div>
+        </div>
+
+        <div id="tab-cards" style="display:none">
+            <div class="section-action-bar">
+                <span class="section-count" id="cards-count">—</span>
+                <button class="btn-vault btn-sm" id="btn-add-card" style="display:none" onclick="openAddCardModal()">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                    Add card
+                </button>
+            </div>
+            <div id="cards-list" class="item-list"><div class="loading-row"><span class="spinner"></span></div></div>
+        </div>
+
+        <div id="tab-keys" style="display:none">
+            <div class="section-action-bar">
+                <span class="section-count" id="keys-count">—</span>
+                <button class="btn-vault btn-sm" id="btn-add-key" style="display:none" onclick="openAddKeyModal()">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                    Add key
+                </button>
+            </div>
+            <div id="keys-list" class="item-list"><div class="loading-row"><span class="spinner"></span></div></div>
+        </div>
+
+        <div id="tab-access" style="display:none">
+            <div class="section-action-bar">
+                <span class="section-count" id="access-count">—</span>
+                <button class="btn-vault btn-sm" id="btn-share" style="display:none" onclick="openShareModal()">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="11" cy="3" r="1.5" stroke="currentColor" stroke-width="1.3" /><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.3" /><circle cx="11" cy="11" r="1.5" stroke="currentColor" stroke-width="1.3" /><path d="M4.5 6.2L9.5 3.8M4.5 7.8l5 2.4" stroke="currentColor" stroke-width="1.2" /></svg>
+                    Share folder
+                </button>
+            </div>
+            <div id="access-list" class="item-list"><div class="loading-row"><span class="spinner"></span></div></div>
+        </div>
+    </div>
+
+    <!-- Web Login -->
+    <div class="modal-backdrop" id="modal-web" onclick="closeModal('modal-web')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="modal-web-title">Add web login</span>
+                <button class="modal-close" onclick="closeModal('modal-web')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">URL</label>
+                        <input class="form-control" id="web-url" placeholder="https://example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input class="form-control" id="web-username" placeholder="you@example.com" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password <span id="web-pass-hint" style="color:var(--text-muted);font-size:12px"></span></label>
+                    <div class="input-wrapper has-reveal-btn">
+                        <input class="form-control" id="web-password" type="password" placeholder="••••••••" style="padding-right:40px" />
+                        <button class="reveal-btn" onclick="toggleReveal('web-password', this)">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                    <textarea class="form-control" id="web-notes" rows="2" placeholder="Any extra info…"></textarea>
+                </div>
+                <p id="web-error" class="field-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-web')">Cancel</button>
+                <button class="btn-vault btn-sm" onclick="saveWebLogin()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card -->
+    <div class="modal-backdrop" id="modal-card" onclick="closeModal('modal-card')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="modal-card-title">Add card</span>
+                <button class="modal-close" onclick="closeModal('modal-card')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Cardholder name</label>
+                    <input class="form-control" id="card-holder" placeholder="Jane Smith" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Card number <span id="card-num-hint" style="color:var(--text-muted);font-size:12px"></span></label>
+                    <input class="form-control pin-input" id="card-number" placeholder="•••• •••• •••• ••••" maxlength="19" inputmode="numeric" />
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Month</label>
+                        <input class="form-control" id="card-month" placeholder="MM" maxlength="2" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <input class="form-control" id="card-year" placeholder="YY" maxlength="2" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV <span id="card-cvv-hint" style="color:var(--text-muted);font-size:12px"></span></label>
+                        <input class="form-control pin-input" id="card-cvv" type="password" placeholder="•••" maxlength="4" inputmode="numeric" />
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">PIN <span id="card-pin-hint" style="color:var(--text-muted);font-size:12px"></span></label>
+                        <input class="form-control pin-input" id="card-pin" type="password" placeholder="••••" maxlength="6" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Billing address <span style="color:var(--text-muted)">(optional)</span></label>
+                        <input class="form-control" id="card-billing" placeholder="123 Main St" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                    <textarea class="form-control" id="card-notes" rows="2" placeholder="Any extra info…"></textarea>
+                </div>
+                <p id="card-error" class="field-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-card')">Cancel</button>
+                <button class="btn-vault btn-sm" onclick="saveCard()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Key -->
+    <div class="modal-backdrop" id="modal-key" onclick="closeModal('modal-key')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="modal-key-title">Add security key</span>
+                <button class="modal-close" onclick="closeModal('modal-key')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Label</label>
+                    <input class="form-control" id="key-label" placeholder="e.g. GitHub 2FA backup key" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN / Secret <span id="key-pin-hint" style="color:var(--text-muted);font-size:12px"></span></label>
+                    <div class="input-wrapper has-reveal-btn">
+                        <input class="form-control pin-input" id="key-pin" type="password" placeholder="••••••" />
+                        <button class="reveal-btn" onclick="toggleReveal('key-pin', this)">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label>
+                    <textarea class="form-control" id="key-notes" rows="2" placeholder="Where this key is used…"></textarea>
+                </div>
+                <p id="key-error" class="field-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-key')">Cancel</button>
+                <button class="btn-vault btn-sm" onclick="saveKey()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Folder Share -->
+    <div class="modal-backdrop" id="modal-share" onclick="closeModal('modal-share')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>Share folder</span>
+                <button class="modal-close" onclick="closeModal('modal-share')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Username to share with</label>
+                    <input class="form-control" id="share-username" placeholder="their email / username" />
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Permission</label>
+                        <select class="form-control" id="share-permission">
+                            <option value="View">View only</option>
+                            <option value="Edit">Can edit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expires on</label>
+                        <input class="form-control" id="share-expiry" type="date" />
+                    </div>
+                </div>
+                <p id="share-error" class="field-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-share')">Cancel</button>
+                <button class="btn-vault btn-sm" onclick="grantAccess()">Share</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Share  -->
+    <div class="modal-backdrop" id="modal-share-item" onclick="closeModal('modal-share-item')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>Share item</span>
+                <button class="modal-close" onclick="closeModal('modal-share-item')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">
+                    Sharing: <strong id="share-item-name" style="color:var(--text-primary)"></strong>
+                </p>
+
+                <div style="margin-bottom:1.25rem">
+                    <p class="section-label" style="margin-top:0">Currently shared with</p>
+                    <div id="share-item-current"></div>
+                </div>
+
+                <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+                    <p class="section-label" style="margin-top:0">Add person</p>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input class="form-control" id="share-item-username" placeholder="their email / username" />
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Permission</label>
+                            <select class="form-control" id="share-item-permission">
+                                <option value="View">View only</option>
+                                <option value="Edit">Can edit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Expires on</label>
+                            <input class="form-control" id="share-item-expiry" type="date" />
+                        </div>
+                    </div>
+                    <p id="share-item-error" class="field-error"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-share-item')">Close</button>
+                <button class="btn-vault btn-sm" onclick="saveItemShare()">Share</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="modal-backdrop" id="modal-history" onclick="closeModal('modal-history')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>Edit history</span>
+                <button class="modal-close" onclick="closeModal('modal-history')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body" id="history-body">
+                <div class="loading-row"><span class="spinner"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="modal-backdrop" id="modal-detail" onclick="closeModal('modal-detail')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="detail-title">Details</span>
+                <button class="modal-close" onclick="closeModal('modal-detail')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body" id="detail-body"></div>
+        </div>
+    </div>
+
+    <!-- Delete Item  -->
+    <div class="modal-backdrop" id="modal-del-item" onclick="closeModal('modal-del-item')">
+        <div class="modal-box modal-sm" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>Delete item</span>
+                <button class="modal-close" onclick="closeModal('modal-del-item')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.65">
+                    Delete <strong id="del-item-name" style="color:var(--text-primary)"></strong>? A history record will be kept.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeModal('modal-del-item')">Cancel</button>
+                <button class="btn-danger btn-sm" onclick="confirmItemDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Item -->
+<div class="modal-backdrop" id="modal-add-item" onclick="closeModal('modal-add-item')">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width:540px">
+        <div class="modal-header">
+            <span>Add item</span>
+            <button class="modal-close" onclick="closeModal('modal-add-item')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex;gap:6px;margin-bottom:1.25rem">
+                <button class="filter-btn active" id="v-type-btn-web" onclick="vSelectItemType('web')">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7 1.5C5.5 4 5 5.5 5 7s.5 3 2 5.5M7 1.5C8.5 4 9 5.5 9 7s-.5 3-2 5.5M1.5 7h11" stroke="currentColor" stroke-width="1" stroke-linecap="round" /></svg>
+                    Web login
+                </button>
+                <button class="filter-btn" id="v-type-btn-card" onclick="vSelectItemType('card')">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M1 6h12" stroke="currentColor" stroke-width="1.2" /></svg>
+                    Card
+                </button>
+                <button class="filter-btn" id="v-type-btn-key" onclick="vSelectItemType('key')">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="3" stroke="currentColor" stroke-width="1.2" fill="none" /><path d="M7.5 7.5L12 12M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
+                    Security key
+                </button>
+            </div>
+            <div id="vai-web">
+                <div class="form-row-2">
+                    <div class="form-group"><label class="form-label">URL</label><input class="form-control" id="vai-url" placeholder="https://example.com" /></div>
+                    <div class="form-group"><label class="form-label">Username</label><input class="form-control" id="vai-username" placeholder="you@example.com" /></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper has-reveal-btn">
+                        <input class="form-control" id="vai-password" type="password" placeholder="••••••••" style="padding-right:40px" />
+                        <button class="reveal-btn" onclick="toggleReveal('vai-password',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg></button>
+                    </div>
+                </div>
+                <div class="form-group"><label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label><textarea class="form-control" id="vai-notes" rows="2" placeholder="Any extra info…"></textarea></div>
+            </div>
+            <div id="vai-card" style="display:none">
+                <div class="form-group"><label class="form-label">Cardholder name</label><input class="form-control" id="vai-holder" placeholder="Jane Smith" /></div>
+                <div class="form-group"><label class="form-label">Card number</label><input class="form-control pin-input" id="vai-number" placeholder="•••• •••• •••• ••••" maxlength="19" inputmode="numeric" /></div>
+                <div class="form-row-3">
+                    <div class="form-group"><label class="form-label">Month</label><input class="form-control" id="vai-month" placeholder="MM" maxlength="2" inputmode="numeric" /></div>
+                    <div class="form-group"><label class="form-label">Year</label><input class="form-control" id="vai-year" placeholder="YY" maxlength="2" inputmode="numeric" /></div>
+                    <div class="form-group"><label class="form-label">CVV</label><input class="form-control pin-input" id="vai-cvv" type="password" placeholder="•••" maxlength="4" inputmode="numeric" /></div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group"><label class="form-label">PIN</label><input class="form-control pin-input" id="vai-pin" type="password" placeholder="••••" maxlength="6" inputmode="numeric" /></div>
+                    <div class="form-group"><label class="form-label">Billing address <span style="color:var(--text-muted)">(optional)</span></label><input class="form-control" id="vai-billing" placeholder="123 Main St" /></div>
+                </div>
+                <div class="form-group"><label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label><textarea class="form-control" id="vai-card-notes" rows="2" placeholder="Any extra info…"></textarea></div>
+            </div>
+            <div id="vai-key" style="display:none">
+                <div class="form-group"><label class="form-label">Label</label><input class="form-control" id="vai-label" placeholder="e.g. GitHub 2FA backup key" /></div>
+                <div class="form-group">
+                    <label class="form-label">PIN / Secret</label>
+                    <div class="input-wrapper has-reveal-btn">
+                        <input class="form-control pin-input" id="vai-kpin" type="password" placeholder="••••••" />
+                        <button class="reveal-btn" onclick="toggleReveal('vai-kpin',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="8" rx="6.5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none" /><circle cx="8" cy="8" r="2" fill="currentColor" /></svg></button>
+                    </div>
+                </div>
+                <div class="form-group"><label class="form-label">Notes <span style="color:var(--text-muted)">(optional)</span></label><textarea class="form-control" id="vai-key-notes" rows="2" placeholder="Where this key is used…"></textarea></div>
+            </div>
+            <p id="vai-error" class="field-error"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeModal('modal-add-item')">Cancel</button>
+            <button class="btn-vault btn-sm" onclick="vSaveAddItem()">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'pin-submit-btn') {
+            if (typeof submitPin === 'function') submitPin();
+        }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && document.getElementById('pin-input') === document.activeElement) {
+            if (typeof submitPin === 'function') submitPin();
+        }
+    });
+</script>
+<script src="~/js/vault.js" asp-append-version="true"></script>

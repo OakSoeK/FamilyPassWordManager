@@ -1,4 +1,4 @@
-using FamilyPasswordManager.Data;
+using FPasswordManager.Data;
 using FPassWordManager.Extensions;
 using FPassWordManager.Models;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +7,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -14,7 +15,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
 
-builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddDefaultIdentity<User>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+})
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -39,7 +47,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
 app.MapOpenApi();
 app.MapScalarApiReference();
 
@@ -50,7 +57,6 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapControllers();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapRazorPages().WithStaticAssets();
 
 app.Run();
