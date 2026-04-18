@@ -108,4 +108,8 @@ FPassWordManager/
 ## Team Members
 
 
--Oak Soe Khant(Developer)
+-Oak Soe Khant(Developer) M00974649
+-Sameer Ansari(Leader) M01040949
+-Sabin Dhakal(Secretary) M01041751
+-Dipsan Dhakal(Developer) M01041750
+-Kallakuri Sri Varshitha Vyshnavi(Tester) M01053500
